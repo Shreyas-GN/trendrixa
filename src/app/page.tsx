@@ -1,51 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Header } from "@/components/Header";
 import { ImageUploader } from "@/components/ImageUploader";
 import { DurationSelector } from "@/components/DurationSelector";
 import { AnalyzeButton } from "@/components/AnalyzeButton";
-import { PredictionResult, type PredictionData } from "@/components/PredictionResult";
+import { PredictionResult } from "@/components/PredictionResult";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import { compressImage } from "@/lib/imageProcessor";
-import type { Duration, AnalyzeRequest, AnalyzeAPIResponse } from "@/types";
-
-interface LoggedPrediction extends PredictionData {
-  timestamp: string;
-  duration: Duration;
-}
+import { predictionLogger } from "@/lib/predictionLogger";
+import type { Duration, AnalyzeRequest, AnalyzeAPIResponse, PredictionResponse } from "@/types";
 
 export default function Home() {
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [duration, setDuration] = useState<Duration>("1m");
   const [isLoading, setIsLoading] = useState(false);
-  const [prediction, setPrediction] = useState<PredictionData | null>(null);
+  const [prediction, setPrediction] = useState<PredictionResponse | null>(null);
+  const [currentLogId, setCurrentLogId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Load any previously logged predictions (just to verify we can access them, no UI for history yet)
-  useEffect(() => {
-    try {
-      const logs = localStorage.getItem("trendrixa_logs");
-      if (logs) {
-        console.log("Loaded historical predictions:", JSON.parse(logs));
-      }
-    } catch (e) {
-      console.error("Failed to load logs from local storage");
-    }
-  }, []);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
   const handleImageSelected = async (file: File) => {
-    setImageFile(file);
     setIsLoading(true);
     setError(null);
     try {
-      // Compress the image before showing the preview/using it for API payload later
       const compressedBase64 = await compressImage(file, 768, 0.8);
       setImagePreview(compressedBase64);
     } catch (e) {
       console.error("Compression failed:", e);
-      // Fallback to uncompressed preview if compression fails
       setImagePreview(URL.createObjectURL(file));
     } finally {
       setIsLoading(false);
@@ -53,7 +36,6 @@ export default function Home() {
   };
 
   const handleClearImage = () => {
-    setImageFile(null);
     setImagePreview(null);
     setError(null);
   };
@@ -84,20 +66,9 @@ export default function Home() {
 
       setPrediction(data.data);
 
-      // Log to local storage
-      try {
-        const existingLogs = localStorage.getItem("trendrixa_logs");
-        const logs: LoggedPrediction[] = existingLogs ? JSON.parse(existingLogs) : [];
-        logs.unshift({
-          ...data.data,
-          timestamp: new Date().toISOString(),
-          duration
-        });
-        // Keep only last 50 predictions to avoid local storage limits
-        localStorage.setItem("trendrixa_logs", JSON.stringify(logs.slice(0, 50)));
-      } catch (e) {
-        console.error("Failed to save prediction to local storage", e);
-      }
+      // Log the prediction locally using our new singleton logger
+      const newId = predictionLogger.logPrediction(data.data, duration);
+      setCurrentLogId(newId);
 
     } catch (err) {
       console.error("Analysis Error:", err);
@@ -107,14 +78,25 @@ export default function Home() {
     }
   };
 
+  const handleMarkOutcome = (outcome: "WIN" | "LOSS") => {
+    if (currentLogId) {
+      predictionLogger.markOutcome(currentLogId, outcome);
+    }
+  };
+
   const handleReset = () => {
     setPrediction(null);
+    setCurrentLogId(null);
     handleClearImage();
   };
 
   return (
     <div className="flex flex-col min-h-screen relative max-w-lg mx-auto border-x border-white/5 sm:my-4 sm:rounded-3xl sm:border sm:shadow-2xl sm:min-h-[850px] overflow-hidden bg-trading-bg">
-      <Header />
+      <Header onToggleAnalytics={() => setIsAnalyticsOpen(true)} />
+
+      {isAnalyticsOpen && (
+        <AnalyticsDashboard onClose={() => setIsAnalyticsOpen(false)} />
+      )}
 
       <main className="flex-1 flex flex-col p-4 gap-6 overflow-y-auto pb-8">
         {!prediction ? (
@@ -166,7 +148,11 @@ export default function Home() {
           </>
         ) : (
           <div className="flex flex-col h-full justify-center pb-12">
-            <PredictionResult prediction={prediction} onReset={handleReset} />
+            <PredictionResult 
+              prediction={prediction} 
+              onReset={handleReset}
+              onMarkOutcome={handleMarkOutcome}
+            />
           </div>
         )}
       </main>

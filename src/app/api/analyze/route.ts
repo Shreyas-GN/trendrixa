@@ -13,6 +13,7 @@ const MAX_RETRIES = 1;
 /**
  * Validate and parse the raw AI text into a PredictionResponse.
  * Throws if the response doesn't match the expected schema.
+ * Includes graceful degradation for missing structured fields.
  */
 function parseAIResponse(raw: string): PredictionResponse {
   // Strip markdown code fences if the model wraps them
@@ -24,7 +25,7 @@ function parseAIResponse(raw: string): PredictionResponse {
   const parsed = JSON.parse(cleaned);
 
   // Validate direction
-  if (parsed.direction !== "HIGH" && parsed.direction !== "LOW") {
+  if (parsed.direction !== "HIGH" && parsed.direction !== "LOW" && parsed.direction !== "NO_TRADE") {
     throw new Error(`Invalid direction: ${parsed.direction}`);
   }
 
@@ -39,11 +40,33 @@ function parseAIResponse(raw: string): PredictionResponse {
     throw new Error("Missing or empty reasoning");
   }
 
-  return {
-    direction: parsed.direction as "HIGH" | "LOW",
+  // Parse structured fields with fallback defaults in case AI misses a field
+  const trend = typeof parsed.trend === "string" ? parsed.trend : "Unclear";
+  const pattern = typeof parsed.pattern === "string" ? parsed.pattern : "None";
+  const momentum = typeof parsed.momentum === "string" ? parsed.momentum : "Unknown";
+  const marketCondition = typeof parsed.marketCondition === "string" ? parsed.marketCondition : "Unclear";
+  const riskLevel = typeof parsed.riskLevel === "string" ? parsed.riskLevel : "Unknown";
+
+  const prediction: PredictionResponse = {
+    direction: parsed.direction as "HIGH" | "LOW" | "NO_TRADE",
     confidence: Math.round(confidence),
     reasoning: parsed.reasoning,
+    trend,
+    pattern,
+    momentum,
+    marketCondition,
+    riskLevel,
   };
+
+  // V2 Enhance: Server-side Confidence Trade Filter
+  // If the AI somehow recommends a trade but is not confident, forcibly override to NO_TRADE.
+  if (prediction.confidence < 65 && prediction.direction !== "NO_TRADE") {
+    prediction.direction = "NO_TRADE";
+    prediction.riskLevel = "High";
+    prediction.reasoning = `Confidence too low (${prediction.confidence}%) for a high-probability trade. System filtered as NO_TRADE. ${prediction.reasoning}`;
+  }
+
+  return prediction;
 }
 
 /**

@@ -16,6 +16,7 @@ const config: Config = {
           card: "#111827",
           high: "#00e676",
           low: "#ff1744",
+          warn: "#ffb300",
           accent: "#3b82f6",
         },
       },

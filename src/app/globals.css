@@ -27,4 +27,8 @@
   .text-glow-low {
     text-shadow: 0 0 10px rgba(255, 23, 68, 0.6), 0 0 20px rgba(255, 23, 68, 0.4);
   }
+
+  .text-glow-warn {
+    text-shadow: 0 0 10px rgba(255, 179, 0, 0.6), 0 0 20px rgba(255, 179, 0, 0.4);
+  }
 }
