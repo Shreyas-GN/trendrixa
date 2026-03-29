@@ -1,0 +1,209 @@
+# 📱 Trendrixa – AI Chart Intelligence Platform
+
+## Master Plan (masterplan.md)
+
+---
+
+# 🧠 Product Vision and Intent
+
+Trendrixa is a **mobile-first, AI-powered chart interpretation system** designed to transform static trading chart screenshots into **actionable directional insights** within seconds. The application operates as a high-speed decision assistant, enabling a user to capture a chart image from an external trading platform and receive a structured prediction indicating whether the short-term movement is likely to be **HIGH (bullish)** or **LOW (bearish)**.
+
+Unlike traditional algorithmic trading systems that rely on structured numerical data feeds, Trendrixa is intentionally designed around **visual intelligence**. It leverages a multimodal AI model capable of interpreting graphical patterns, candlestick structures, and trend formations directly from images. This approach aligns with real-world usage where traders visually interpret charts and make rapid decisions based on pattern recognition.
+
+The system is optimized for **speed, clarity, and minimal interaction**, ensuring that the time between image capture and actionable output remains within a strict 1–3 second window.
+
+---
+
+# 👤 User Context and Operational Workflow
+
+Trendrixa is built for a **single-user environment**, with a workflow that assumes the user is actively trading on a separate device (typically a desktop or laptop). The user captures chart screenshots using a mobile device and immediately uploads them into the application.
+
+The application must therefore be optimized for:
+
+* One-handed mobile interaction
+* Rapid input and response cycles
+* Minimal cognitive load during usage
+
+The system is not intended for passive analysis or long-form insights. Instead, it is designed for **real-time decision support**, where clarity and immediacy are more valuable than depth.
+
+---
+
+# ⚙️ Functional Architecture and Feature Definition
+
+## Image Acquisition and Preprocessing
+
+The primary input mechanism of Trendrixa is image-based. The system must support both camera capture and file upload from the device gallery. Upon selection, the image should be immediately rendered within the interface to confirm correctness.
+
+Before transmission to the backend, the application should perform **client-side preprocessing**, including resizing and compression. This is critical to reduce payload size and ensure low-latency communication with the AI service. The preprocessing step should preserve enough visual fidelity to retain candlestick and trend details while minimizing file size.
+
+The system should also be tolerant of varying chart styles, including different color schemes, grid overlays, and indicator placements.
+
+---
+
+## Trade Duration Parameterization
+
+The application must allow the user to specify a prediction horizon, typically in short intervals such as 1 minute, 2 minutes, or 5 minutes. This parameter is not merely cosmetic; it must be injected into the AI prompt to influence how the model interprets the chart’s short-term momentum and expected movement.
+
+The duration selector should be implemented as a highly accessible UI element, allowing quick selection without disrupting the user’s flow.
+
+---
+
+## AI Prediction Engine (Core Intelligence Layer)
+
+The central component of Trendrixa is its AI-driven prediction engine. This engine is responsible for transforming raw visual input into structured, decision-ready output.
+
+Upon receiving an image and duration parameter, the backend must construct a carefully engineered prompt that instructs the AI model to:
+
+* Identify the overall trend direction (uptrend, downtrend, or consolidation)
+* Detect key candlestick patterns such as engulfing formations, doji candles, rejection wicks, and continuation patterns
+* Evaluate short-term momentum based on slope, density, and volatility of price movement
+* Infer the most probable directional movement within the specified duration
+
+The system must use a **vision-capable large language model (LLM)** accessed via API. The model should support both image input and textual reasoning.
+
+The response must be constrained to a strict format, including:
+
+* A binary directional output (HIGH or LOW)
+* A numerical confidence score (0–100%)
+* A concise reasoning statement grounded in observable chart features
+
+The backend must implement **response normalization and validation**, ensuring that even if the AI output varies slightly, the final result presented to the user remains consistent and predictable.
+
+---
+
+## Result Interpretation and Presentation
+
+The output layer of the application must prioritize **immediate comprehension**. The prediction should be displayed prominently, using strong visual cues (e.g., color coding and iconography) to distinguish between bullish and bearish outcomes.
+
+The confidence score should be clearly visible, providing a quantitative sense of certainty. The reasoning should be brief but meaningful, referencing specific chart patterns or trends to enhance interpretability.
+
+The interface must avoid unnecessary detail and focus on delivering a **single, actionable insight**.
+
+---
+
+## Optional Prediction Logging and Feedback Loop
+
+Although not required for the initial version, the system should be architected to support a future logging mechanism. This would allow the application to store predictions along with timestamps and associated images.
+
+An extended version of this feature could allow the user to manually record the actual outcome of the trade, enabling the calculation of historical accuracy. This data could later be used to refine prompt strategies or inform the development of a custom-trained model.
+
+---
+
+# 🏗️ System Architecture
+
+Trendrixa follows a **unified full-stack architecture** using a modern web framework that supports both frontend and backend logic within a single codebase.
+
+The frontend is responsible for user interaction, image capture, and display logic. The backend acts as a secure intermediary between the client and the AI service, handling prompt construction, API communication, and response formatting.
+
+The data flow is as follows:
+
+1. The user uploads or captures an image via the mobile interface.
+2. The image is optionally compressed and transmitted to a backend API endpoint.
+3. The backend constructs a structured prompt incorporating the image and duration parameter.
+4. The request is sent to the AI provider.
+5. The AI returns a structured analysis.
+6. The backend validates and formats the response.
+7. The frontend renders the final output.
+
+This architecture ensures security, modularity, and ease of iteration.
+
+---
+
+# 🧰 Technology Stack
+
+The recommended technology stack is centered around simplicity, speed, and scalability.
+
+The frontend and backend should be implemented using **Next.js with the App Router architecture**, enabling a unified development experience and seamless deployment. Styling should be handled using **Tailwind CSS**, allowing rapid development of a responsive, mobile-first interface.
+
+State management can be handled using React’s built-in hooks, as the application does not require complex global state.
+
+The AI layer should be powered by a **vision-enabled API**, such as OpenAI’s multimodal models. This choice provides a balance between performance, accuracy, and ease of integration.
+
+For future enhancements involving data persistence, a backend-as-a-service platform such as **Firebase or Supabase** can be introduced.
+
+---
+
+# 🧠 Prompt Engineering Strategy
+
+The effectiveness of Trendrixa is fundamentally tied to the quality of its prompt design. The prompt must be explicit, structured, and optimized for consistent output.
+
+It should instruct the model to focus exclusively on chart interpretation and avoid generic or speculative language. The output format must be strictly defined to enable reliable parsing and display.
+
+Prompt iteration will be a continuous process, with adjustments made based on observed output quality and consistency.
+
+---
+
+# ⚡ Performance and Latency Optimization
+
+Given the real-time nature of the application, performance is a critical consideration. The system must aim to deliver results within a 1–3 second window.
+
+This requires:
+
+* Efficient image compression
+* Minimal backend processing overhead
+* Selection of an AI model optimized for latency
+* Avoidance of unnecessary network calls
+
+The frontend should provide immediate feedback during processing, such as a loading indicator, to maintain user confidence.
+
+---
+
+# 📱 User Interface and Experience Design
+
+The UI must be designed with a **mobile-first philosophy**, emphasizing simplicity and speed. The primary screen should guide the user through a linear flow: upload image, select duration, trigger prediction.
+
+All interactive elements must be touch-friendly, with adequate spacing and clear visual hierarchy. The use of a dark theme is recommended to align with trading environments and reduce eye strain.
+
+The result screen should present the prediction in a bold, uncluttered format, ensuring that the user can interpret the output instantly.
+
+---
+
+# 🔐 Security Considerations
+
+Although the application is intended for personal use, standard security practices must be followed. API keys must be stored securely in environment variables and never exposed to the client.
+
+All communication with the AI service must be routed through the backend to prevent unauthorized access.
+
+---
+
+# 💰 Cost Considerations
+
+The primary operational cost is associated with AI API usage. Given the expected usage pattern, the cost per request remains low, making the system economically viable.
+
+Cost can be managed through:
+
+* Image optimization
+* Avoidance of redundant requests
+* Controlled usage patterns
+
+---
+
+# 🪜 Development Roadmap
+
+The development process should begin with a minimal viable product focusing on core functionality. This includes image upload, AI integration, and result display.
+
+Subsequent phases should focus on refining the user experience, improving prompt quality, and enhancing response consistency.
+
+Future phases may introduce logging, analytics, and more advanced intelligence mechanisms.
+
+---
+
+# ⚠️ Risks and Mitigation Strategies
+
+The primary risks include variability in AI output, latency issues, and over-reliance on predictions. These can be mitigated through structured prompts, performance optimization, and clear user expectations.
+
+---
+
+# 🔮 Future Evolution
+
+Trendrixa has the potential to evolve into a more sophisticated system by incorporating structured market data, training custom models, and expanding into a full-featured trading assistant platform.
+
+---
+
+# 🧠 Final Perspective
+
+Trendrixa is not merely an application; it is an evolving intelligence system. Its value lies in its ability to improve over time through observation, iteration, and refinement. The combination of visual AI, prompt engineering, and user feedback creates a foundation for continuous enhancement.
+
+---
+
+**End of Master Plan**
