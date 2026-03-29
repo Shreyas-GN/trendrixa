@@ -20,25 +20,25 @@ export function PredictionResult({ prediction, onReset, onMarkOutcome }: Predict
   // Light mode specific theme vars
   const getThemeVars = () => {
     if (isNoTrade) return {
-      border: "border-trading-warn/50",
-      bg: "bg-[#fffbeb]", // Very light amber
-      text: "text-trading-warn",
+      border: "border-amber-400/50",
+      bg: "bg-amber-50",
+      text: "text-amber-500 drop-shadow-sm",
       indicator: "⚠️",
-      barColor: "bg-trading-warn",
+      barColor: "bg-amber-500",
       label: "NO TRADE"
     };
     if (isHigh) return {
-      border: "border-[#10b981]/40",
-      bg: "bg-[#f0fdf4]",
-      text: "text-[#10b981]",
+      border: "border-emerald-400/50",
+      bg: "bg-emerald-50",
+      text: "text-emerald-500 drop-shadow-sm",
       indicator: "↑",
       barColor: "bg-gradient-to-r from-emerald-400 to-emerald-500",
       label: "HIGH"
     };
     return {
-      border: "border-[#f43f5e]/40",
-      bg: "bg-[#fff1f2]",
-      text: "text-[#f43f5e]",
+      border: "border-rose-400/50",
+      bg: "bg-rose-50",
+      text: "text-rose-500 drop-shadow-sm",
       indicator: "↓",
       barColor: "bg-gradient-to-r from-rose-400 to-rose-500",
       label: "LOW"
