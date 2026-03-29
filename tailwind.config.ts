@@ -12,12 +12,12 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         trading: {
-          bg: "#0a0e1a",
-          card: "#111827",
-          high: "#00e676",
-          low: "#ff1744",
-          warn: "#ffb300",
-          accent: "#3b82f6",
+          bg: "#eef2f9",
+          card: "#ffffff",
+          high: "#10b981",
+          low: "#f43f5e",
+          warn: "#f59e0b",
+          accent: "#8ba1f5",
         },
       },
       animation: {
